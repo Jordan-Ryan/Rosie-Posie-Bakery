@@ -14,13 +14,10 @@ const ctx = canvas.getContext("2d");
 const entriesEl = $("#entries") as HTMLTextAreaElement;
 const spinBtn = $("#spinBtn");
 const resetBtn = $("#resetBtn");
-const shuffleEl = $("#shuffle") as HTMLInputElement;
-const noRepeatEl = $("#noRepeat") as HTMLInputElement;
 const errorEl = $("#error") as HTMLParagraphElement;
 const historyEl = $("#history") as HTMLUListElement;
 
 let entries: string[] = [];
-let lastWinner = "";
 let isSpinning = false;
 
 function parseEntries(input: string): string[] {
@@ -169,22 +166,22 @@ function celebrate(): void {
 }
 
 let currentRotation = 0;
+let lastEntryCount = 0;
 
 function spin(): void {
   if (isSpinning) return;
   entries = parseEntries(entriesEl.value);
-  if (shuffleEl.checked) entries = shuffleArray(entries);
+  entries = shuffleArray(entries);
   if (entries.length < 2) {
     setError("Please enter at least two entries (comma or newline separated).");
     return;
   }
-  if (noRepeatEl.checked && entries.length > 1) {
-    // Move last winner to end if present to reduce chance of immediate repeat
-    const idx = entries.findIndex(e => e.toLowerCase() === lastWinner.toLowerCase());
-    if (idx >= 0) entries.push(entries.splice(idx, 1)[0]);
-  }
   setError(null);
   persistEntries(entries);
+
+  // Reset rotation for each spin to ensure consistent behavior
+  currentRotation = 0;
+  lastEntryCount = entries.length;
 
   isSpinning = true;
   const slice = (Math.PI * 2) / entries.length;
@@ -195,7 +192,7 @@ function spin(): void {
 
   const durationMs = 4200;
   const start = performance.now();
-  const startRot = currentRotation;
+  const startRot = 0;
 
   const animate = (now: number) => {
     const t = Math.min(1, (now - start) / durationMs);
@@ -206,7 +203,6 @@ function spin(): void {
       requestAnimationFrame(animate);
     } else {
       const winner = entries[targetIndex];
-      lastWinner = winner;
       const result: SpinResult = { winner, at: new Date().toLocaleString() };
       addHistory(result);
       celebrate();
@@ -219,7 +215,9 @@ function spin(): void {
 
 function resetWheel(): void {
   currentRotation = 0;
-  drawWheel(parseEntries(entriesEl.value), currentRotation);
+  const parsed = parseEntries(entriesEl.value);
+  lastEntryCount = parsed.length;
+  drawWheel(parsed, currentRotation);
 }
 
 function init(): void {
@@ -233,7 +231,13 @@ function init(): void {
     try { resetWheel(); } catch (e) { console.error("Reset failed", e); }
   });
   entriesEl.addEventListener("input", () => {
-    drawWheel(parseEntries(entriesEl.value));
+    const parsed = parseEntries(entriesEl.value);
+    // Reset rotation if entry count changes during input
+    if (parsed.length !== lastEntryCount && !isSpinning) {
+      currentRotation = 0;
+      lastEntryCount = parsed.length;
+    }
+    drawWheel(parsed, currentRotation);
   });
 }
 
