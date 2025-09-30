@@ -1,0 +1,10 @@
+IMPORTANT: Add your logo here!
+
+1. Save the Rosie Posie Bakery logo (the circular brown logo with the pink mixer) as:
+   public/logo.png
+
+2. The logo should be a PNG file with transparent background if possible
+
+3. Recommended size: 200x200px or larger (will be displayed at 56px height)
+
+Once you add logo.png, it will appear on all pages automatically!
