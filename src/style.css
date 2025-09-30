@@ -30,8 +30,8 @@ h3{font-size:1.6rem}
 .rpb-header{position:sticky;top:0;z-index:10;background:var(--pink-200);border-bottom:4px solid var(--pink-300)}
 .rpb-header .container{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
 .brand{display:flex;gap:12px;align-items:center}
-.brand .logo{font-size:28px;filter:drop-shadow(0 2px 0 #d65388)}
-.brand h1{line-height:1}
+.brand .logo{height:56px;width:auto}
+.brand h1{line-height:1;font-size:1.5rem}
 .brand p{margin:0;color:var(--brown-700);font-size:.9rem}
 .nav{display:flex;gap:12px;flex-wrap:wrap}
 .nav a{color:var(--brown-900);text-decoration:none;background:#fff;border-radius:999px;padding:8px 12px;border:3px solid var(--pink-500);box-shadow:var(--shadow);font-weight:600}
@@ -57,9 +57,10 @@ ul{padding-left:20px}
 .terms li{background:var(--cream);border-radius:14px;padding:10px;border:2px solid var(--pink-100)}
 
 .footer{padding:32px 0 60px;text-align:center;color:var(--brown-700)}
-.footer-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
-.footer-links a{color:var(--brown-900);text-decoration:none;font-weight:600;transition:color .2s}
-.footer-links a:hover{color:var(--pink-700)}
+.footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.social-link{display:flex;align-items:center;gap:6px;color:var(--brown-900);text-decoration:none;font-weight:600;transition:all .2s;background:#fff;padding:8px 14px;border-radius:999px;border:3px solid var(--pink-300);box-shadow:var(--shadow)}
+.social-link svg{flex-shrink:0}
+.social-link:hover{color:var(--pink-700);border-color:var(--pink-500);transform:translateY(-2px)}
 
 /* Spinner */
 .spinner-card{overflow:hidden}
