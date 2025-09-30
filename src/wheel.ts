@@ -254,7 +254,9 @@ function spin(): void {
   const targetAngle = slice * targetIndex + slice / 2 + randomOffset;
   
   const spins = 6 + Math.floor(Math.random() * 4); // full rotations
-  const finalRotation = spins * Math.PI * 2 - targetAngle;
+  // Pointer is at top (270° or -90° or 3π/2), so we need to account for that
+  const pointerAngle = -Math.PI / 2;
+  const finalRotation = spins * Math.PI * 2 + (pointerAngle - targetAngle);
 
   const durationMs = 4200;
   const start = performance.now();
@@ -268,7 +270,12 @@ function spin(): void {
     if (t < 1) {
       requestAnimationFrame(animate);
     } else {
-      const winner = entries[targetIndex];
+      // Double-check which slice is actually under the pointer
+      const normalizedRotation = ((currentRotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const angleAtPointer = ((-pointerAngle - normalizedRotation) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+      const actualWinnerIndex = Math.floor(angleAtPointer / slice) % entries.length;
+      const winner = entries[actualWinnerIndex];
+      
       const result: SpinResult = { winner, at: new Date().toLocaleString() };
       addHistory(result);
       celebrate();
