@@ -232,7 +232,7 @@ function showWinnerPopup(winner: string): void {
 function spin(): void {
   if (isSpinning) return;
   entries = parseEntries(entriesEl.value);
-  entries = shuffleArray(entries);
+  // Don't shuffle - keep entries in consistent order
   if (entries.length < 2) {
     setError("Please enter at least two entries (comma or newline separated).");
     return;
@@ -244,23 +244,15 @@ function spin(): void {
 
   isSpinning = true;
   const slice = (Math.PI * 2) / entries.length;
-  const targetIndex = Math.floor(Math.random() * entries.length);
   
-  // Land randomly anywhere within the winner's slice (not just center)
-  // This ensures it clearly lands ON someone, not between them
-  const randomOffset = (Math.random() - 0.5) * slice * 0.7; // Random within 70% of slice
-  const targetAngle = slice * targetIndex + slice / 2 + randomOffset;
-  
-  const spins = 6 + Math.floor(Math.random() * 4); // full rotations
-  // Pointer is at top (270° or -90° or 3π/2), so we need to account for that
-  const pointerAngle = -Math.PI / 2;
-  
-  // Always start from 0 and calculate final position
-  const startRot = 0;
-  const finalRotation = spins * Math.PI * 2 + (pointerAngle - targetAngle);
+  // Just spin randomly - we'll calculate the winner at the end
+  const spins = 6 + Math.floor(Math.random() * 4);
+  const extraRotation = Math.random() * Math.PI * 2;
+  const finalRotation = spins * Math.PI * 2 + extraRotation;
 
   const durationMs = 4200;
   const start = performance.now();
+  const startRot = 0;
 
   const animate = (now: number) => {
     const t = Math.min(1, (now - start) / durationMs);
@@ -270,30 +262,42 @@ function spin(): void {
     if (t < 1) {
       requestAnimationFrame(animate);
     } else {
-      // Calculate which slice is actually under the pointer after final rotation
-      // The pointer is at the top, which is -π/2 in standard coordinates
-      // When the wheel rotates by R, a point at angle θ moves to angle θ + R
-      // So to find what's under the pointer, we need: θ + rotation = pointerAngle
-      // Therefore: θ = pointerAngle - rotation
+      // Calculate winner based on final position
+      // The pointer is at the top (3π/2 or -π/2)
+      // Normalize current rotation
+      let normalizedRot = currentRotation % (Math.PI * 2);
+      while (normalizedRot < 0) normalizedRot += Math.PI * 2;
       
-      let angleOnWheel = pointerAngle - currentRotation;
+      // The wheel has rotated by normalizedRot
+      // Slice 0 starts at 0, after rotation it's at normalizedRot
+      // The pointer is at 3π/2 (or -π/2, same thing)
+      // We need to find which slice is at the pointer position
       
-      // Normalize to 0-2π range
-      angleOnWheel = angleOnWheel % (Math.PI * 2);
-      if (angleOnWheel < 0) angleOnWheel += Math.PI * 2;
+      const pointerPos = (3 * Math.PI) / 2; // Top of wheel
       
-      // Find which slice this angle falls into
-      const actualWinnerIndex = Math.floor(angleOnWheel / slice) % entries.length;
-      const winner = entries[actualWinnerIndex];
+      // What angle on the original wheel is now at the pointer?
+      let angleAtPointer = pointerPos - normalizedRot;
+      while (angleAtPointer < 0) angleAtPointer += Math.PI * 2;
+      angleAtPointer = angleAtPointer % (Math.PI * 2);
+      
+      // Which slice does this belong to?
+      const winnerIndex = Math.floor(angleAtPointer / slice) % entries.length;
+      const winner = entries[winnerIndex];
       
       const result: SpinResult = { winner, at: new Date().toLocaleString() };
       addHistory(result);
       celebrate();
       showWinnerPopup(winner);
-      console.info("Spin result", result, { currentRotation, angleOnWheel, actualWinnerIndex, slice, entries });
+      console.info("Spin winner:", winner, "Index:", winnerIndex, "Debug:", { 
+        normalizedRot, 
+        pointerPos, 
+        angleAtPointer, 
+        slice, 
+        allEntries: entries 
+      });
       isSpinning = false;
       
-      // Reset rotation to 0 for next spin to avoid accumulation
+      // Reset rotation to 0 for next spin
       currentRotation = 0;
       drawWheel(entries, 0);
     }
