@@ -240,8 +240,6 @@ function spin(): void {
   setError(null);
   persistEntries(entries);
 
-  // Reset rotation for each spin to ensure consistent behavior
-  currentRotation = 0;
   lastEntryCount = entries.length;
 
   isSpinning = true;
@@ -256,11 +254,13 @@ function spin(): void {
   const spins = 6 + Math.floor(Math.random() * 4); // full rotations
   // Pointer is at top (270° or -90° or 3π/2), so we need to account for that
   const pointerAngle = -Math.PI / 2;
+  
+  // Always start from 0 and calculate final position
+  const startRot = 0;
   const finalRotation = spins * Math.PI * 2 + (pointerAngle - targetAngle);
 
   const durationMs = 4200;
   const start = performance.now();
-  const startRot = 0;
 
   const animate = (now: number) => {
     const t = Math.min(1, (now - start) / durationMs);
@@ -270,18 +270,33 @@ function spin(): void {
     if (t < 1) {
       requestAnimationFrame(animate);
     } else {
-      // Double-check which slice is actually under the pointer
-      const normalizedRotation = ((currentRotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-      const angleAtPointer = ((-pointerAngle - normalizedRotation) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-      const actualWinnerIndex = Math.floor(angleAtPointer / slice) % entries.length;
+      // Calculate which slice is actually under the pointer after final rotation
+      // Normalize the rotation to 0-2π range
+      let normalizedRotation = currentRotation % (Math.PI * 2);
+      if (normalizedRotation < 0) normalizedRotation += Math.PI * 2;
+      
+      // The pointer is at -π/2 (top), calculate what angle on the wheel is under it
+      // We subtract the rotation from the pointer position
+      let angleUnderPointer = -pointerAngle - normalizedRotation;
+      
+      // Normalize to 0-2π
+      angleUnderPointer = angleUnderPointer % (Math.PI * 2);
+      if (angleUnderPointer < 0) angleUnderPointer += Math.PI * 2;
+      
+      // Find which slice this angle falls into
+      const actualWinnerIndex = Math.floor(angleUnderPointer / slice) % entries.length;
       const winner = entries[actualWinnerIndex];
       
       const result: SpinResult = { winner, at: new Date().toLocaleString() };
       addHistory(result);
       celebrate();
       showWinnerPopup(winner);
-      console.info("Spin result", result);
+      console.info("Spin result", result, { normalizedRotation, angleUnderPointer, actualWinnerIndex, slice });
       isSpinning = false;
+      
+      // Reset rotation to 0 for next spin to avoid accumulation
+      currentRotation = 0;
+      drawWheel(entries, 0);
     }
   };
   requestAnimationFrame(animate);
