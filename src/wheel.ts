@@ -271,27 +271,26 @@ function spin(): void {
       requestAnimationFrame(animate);
     } else {
       // Calculate which slice is actually under the pointer after final rotation
-      // Normalize the rotation to 0-2π range
-      let normalizedRotation = currentRotation % (Math.PI * 2);
-      if (normalizedRotation < 0) normalizedRotation += Math.PI * 2;
+      // The pointer is at the top, which is -π/2 in standard coordinates
+      // When the wheel rotates by R, a point at angle θ moves to angle θ + R
+      // So to find what's under the pointer, we need: θ + rotation = pointerAngle
+      // Therefore: θ = pointerAngle - rotation
       
-      // The pointer is at -π/2 (top), calculate what angle on the wheel is under it
-      // We subtract the rotation from the pointer position
-      let angleUnderPointer = -pointerAngle - normalizedRotation;
+      let angleOnWheel = pointerAngle - currentRotation;
       
-      // Normalize to 0-2π
-      angleUnderPointer = angleUnderPointer % (Math.PI * 2);
-      if (angleUnderPointer < 0) angleUnderPointer += Math.PI * 2;
+      // Normalize to 0-2π range
+      angleOnWheel = angleOnWheel % (Math.PI * 2);
+      if (angleOnWheel < 0) angleOnWheel += Math.PI * 2;
       
       // Find which slice this angle falls into
-      const actualWinnerIndex = Math.floor(angleUnderPointer / slice) % entries.length;
+      const actualWinnerIndex = Math.floor(angleOnWheel / slice) % entries.length;
       const winner = entries[actualWinnerIndex];
       
       const result: SpinResult = { winner, at: new Date().toLocaleString() };
       addHistory(result);
       celebrate();
       showWinnerPopup(winner);
-      console.info("Spin result", result, { normalizedRotation, angleUnderPointer, actualWinnerIndex, slice });
+      console.info("Spin result", result, { currentRotation, angleOnWheel, actualWinnerIndex, slice, entries });
       isSpinning = false;
       
       // Reset rotation to 0 for next spin to avoid accumulation
