@@ -57,6 +57,9 @@ ul{padding-left:20px}
 .terms li{background:var(--cream);border-radius:14px;padding:10px;border:2px solid var(--pink-100)}
 
 .footer{padding:32px 0 60px;text-align:center;color:var(--brown-700)}
+.footer-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.footer-links a{color:var(--brown-900);text-decoration:none;font-weight:600;transition:color .2s}
+.footer-links a:hover{color:var(--pink-700)}
 
 /* Spinner */
 .spinner-card{overflow:hidden}
