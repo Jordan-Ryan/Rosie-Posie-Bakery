@@ -168,6 +168,67 @@ function celebrate(): void {
 let currentRotation = 0;
 let lastEntryCount = 0;
 
+function showWinnerPopup(winner: string): void {
+  const popup = document.createElement("div");
+  popup.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--pink-500);
+    color: white;
+    padding: 40px 60px;
+    border-radius: 24px;
+    border: 6px solid white;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    font-family: 'Lilita One', system-ui;
+    font-size: 2.5rem;
+    text-align: center;
+    z-index: 1000;
+    animation: popIn 0.3s ease-out;
+  `;
+  
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes popIn {
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+  `;
+  document.head.appendChild(style);
+  
+  const title = document.createElement("div");
+  title.textContent = "🎉 Winner! 🎉";
+  title.style.cssText = "font-size: 1.5rem; margin-bottom: 20px; opacity: 0.9;";
+  
+  const name = document.createElement("div");
+  name.textContent = winner;
+  name.style.cssText = "font-size: 3rem; margin: 20px 0;";
+  
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Close";
+  closeBtn.style.cssText = `
+    background: white;
+    color: var(--brown-900);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 999px;
+    font-family: 'Fredoka', system-ui;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 20px;
+  `;
+  closeBtn.onclick = () => popup.remove();
+  
+  popup.appendChild(title);
+  popup.appendChild(name);
+  popup.appendChild(closeBtn);
+  document.body.appendChild(popup);
+  
+  setTimeout(() => closeBtn.focus(), 100);
+}
+
 function spin(): void {
   if (isSpinning) return;
   entries = parseEntries(entriesEl.value);
@@ -186,7 +247,12 @@ function spin(): void {
   isSpinning = true;
   const slice = (Math.PI * 2) / entries.length;
   const targetIndex = Math.floor(Math.random() * entries.length);
-  const targetAngle = slice * targetIndex + slice / 2; // center of slice
+  
+  // Land randomly anywhere within the winner's slice (not just center)
+  // This ensures it clearly lands ON someone, not between them
+  const randomOffset = (Math.random() - 0.5) * slice * 0.7; // Random within 70% of slice
+  const targetAngle = slice * targetIndex + slice / 2 + randomOffset;
+  
   const spins = 6 + Math.floor(Math.random() * 4); // full rotations
   const finalRotation = spins * Math.PI * 2 - targetAngle;
 
@@ -206,6 +272,7 @@ function spin(): void {
       const result: SpinResult = { winner, at: new Date().toLocaleString() };
       addHistory(result);
       celebrate();
+      showWinnerPopup(winner);
       console.info("Spin result", result);
       isSpinning = false;
     }
