@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rosie Posie Bakery</title>
-    <meta name="description" content="Create your dream cake in 5 sweet steps and join giveaways!" />
+    <title>Giveaway Wheel — Rosie Posie Bakery</title>
+    <meta name="description" content="Spin the wheel to pick a random giveaway winner!" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lilita+One&display=swap" rel="stylesheet" />
@@ -34,30 +34,35 @@
     <main>
       <section class="hero">
         <div class="container">
-          <h2>Create your dream cake with these 5 sweet steps!</h2>
-          <p>Choose your size, flavour, buttercream, and more — it's completely custom, freshly baked and totally delicious!</p>
-          <a class="cta" href="/Rosie-Posie-Bakery/build-a-cake.html">Start building</a>
+          <h2>Giveaway Wheel</h2>
+          <p>Enter names or prizes separated by commas. Click Spin to pick a random winner. A confetti burst and log entry will confirm the result.</p>
         </div>
       </section>
 
-      <section class="card-grid home-cards">
-        <article class="card">
-          <h3>🎂 Build-a-Cake</h3>
-          <p>Design your perfect custom cake in 5 sweet steps!</p>
-          <a class="cta" href="/Rosie-Posie-Bakery/build-a-cake.html">Explore</a>
-        </article>
-
-        <article class="card">
-          <h3>🍪 Sweet Selection</h3>
-          <p>Cookie pies, cupcakes, and more delicious treats!</p>
-          <a class="cta" href="/Rosie-Posie-Bakery/sweet-selection.html">Browse</a>
-        </article>
-
-        <article class="card">
-          <h3>🥖 Sourdough</h3>
-          <p>Artisan loaves, muffins, and focaccia breads!</p>
-          <a class="cta" href="/Rosie-Posie-Bakery/sourdough.html">View Menu</a>
-        </article>
+      <section class="card spinner-card container">
+        <div class="spinner-layout">
+          <div class="wheel-wrap">
+            <canvas id="wheelCanvas" width="440" height="440" aria-label="Giveaway wheel" role="img"></canvas>
+            <div class="pointer">▼</div>
+          </div>
+          <form id="wheelForm" class="wheel-form" novalidate>
+            <label for="entries">Entries</label>
+            <textarea id="entries" placeholder="Alice, Bob, Charlie" rows="6"></textarea>
+            <div class="row">
+              <label><input id="shuffle" type="checkbox" checked /> Shuffle</label>
+              <label><input id="noRepeat" type="checkbox" /> No immediate repeat</label>
+            </div>
+            <div class="row">
+              <button id="spinBtn" type="button" class="cta">Spin</button>
+              <button id="resetBtn" type="button" class="secondary">Reset</button>
+            </div>
+            <p id="error" class="error" role="alert" hidden></p>
+            <details>
+              <summary>Recent spins</summary>
+              <ul id="history" class="history"></ul>
+            </details>
+          </form>
+        </div>
       </section>
     </main>
 
@@ -67,8 +72,6 @@
       </div>
     </footer>
 
-    <script type="module" src="/src/home.ts"></script>
+    <script type="module" src="/src/wheel.ts"></script>
   </body>
-  </html>
-
-
+</html>
